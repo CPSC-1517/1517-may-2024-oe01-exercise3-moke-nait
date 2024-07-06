@@ -58,17 +58,21 @@
 								  Immediate="true"
 								  Required
 								  RequiredError="Reviewer is required." />
-					<MudSelect T="RatingType"
+					<MudSelect T="string"
 							   Label="Rating"
 							   Variant="Variant.Outlined"
 							   @bind-Value="@rating"
 							   Immediate="true"
 							   Required
 							   RequiredError="Rating is required.">
-						@foreach (RatingType value in Enum.GetValues(typeof(RatingType)))
+						@* @foreach (RatingType value in Enum.GetValues(typeof(RatingType)))
 							
 						{
 							<MudSelectItem Value="@value">@value</MudSelectItem>							
+						} *@
+						@foreach (string value in ratingList)
+						{
+							<MudSelectItem Value="@value">@value</MudSelectItem>
 						}
 					</MudSelect>
 					<MudTextField Variant="Variant.Outlined"
@@ -111,11 +115,12 @@
 
 @code {
 	private List<string> authorList = [];
+	private List<string> ratingList = [];
 	private string isbn = string.Empty;
 	private string title = string.Empty;
 	private string author = string.Empty;
 	private string reviewer = string.Empty;
-	private RatingType rating;
+	private string rating = string.Empty;
 	private string comment = string.Empty;
 	private List<string> errorMessages = [];
 	private Review review = null;
@@ -128,10 +133,13 @@
 	{
 		authorList = new List<string>
 	{
-		"John Doe",
-		"Jane Smith",
-		"Emily Jones"
+		"Karen Miller",
+		"Cixin Liu",
+		"Adrian Tchaikovsky"
 	};
+
+		ratingList = Enum.GetNames(typeof(RatingType)).ToList();
+
 		base.OnInitialized();
 	}
 
@@ -145,11 +153,14 @@
 		{
 			try
 			{
-				var review = new Review(isbn, title, author, reviewer, rating, comment);
-				string fileName = @"wwwroot/data/TestData.csv";
-				string line = $"{review.ToString()}\n";
-				File.AppendAllText(fileName, line);
-				successMessage = $"Review for {title} by {reviewer} added successfully!";
+				if (Enum.TryParse<RatingType>(rating, out var ratingEnum))
+				{
+					var review = new Review(isbn, title, author, reviewer, ratingEnum, comment);
+					string fileName = @"wwwroot/data/TestData.csv";
+					string line = $"{review.ToString()}\n";
+					File.AppendAllText(fileName, line);
+					successMessage = $"Review for {title} by {reviewer} added successfully!";
+				}				
 			}
 			catch (Exception ex)
 			{
