@@ -66,8 +66,9 @@
 							   Required
 							   RequiredError="Rating is required.">
 						@foreach (RatingType value in Enum.GetValues(typeof(RatingType)))
+							
 						{
-							<MudSelectItem Value="value">@value</MudSelectItem>
+							<MudSelectItem Value="@value">@value</MudSelectItem>							
 						}
 					</MudSelect>
 					<MudTextField Variant="Variant.Outlined"
