@@ -1,0 +1,97 @@
+﻿@page "/reviewreport"
+<PageTitle>Review Report</PageTitle>
+
+<MudText Typo="Typo.h1">Review Report</MudText>
+
+@if (errorMessages.Count > 0)
+{
+	<div class="alert alert-danger">
+		<MudText Typo="Typo.h6">Please fix the following issues:</MudText>
+		<ul>
+			@foreach (var error in errorMessages)
+			{
+				<li>@error</li>
+			}
+		</ul>
+	</div>
+}
+
+@if (reviews.Count == 0)
+{
+	<MudText Typo="Typo.h5">Nothing to report.</MudText>
+}
+else
+{
+	<MudTable Items="reviews">
+		<HeaderContent>
+			<MudTh>Title</MudTh>
+			<MudTh>Author</MudTh>
+			<MudTh>Reviewer</MudTh>
+			<MudTh>Rating</MudTh>
+			<MudTh>Comment</MudTh>
+		</HeaderContent>
+		<RowTemplate>
+			<MudTd>@context.Title</MudTd>
+			<MudTd>@context.Author</MudTd>
+			<MudTd>@context.Reviewer</MudTd>
+			<MudTd>@context.Rating</MudTd>
+			<MudTd>@context.Comment</MudTd>
+		</RowTemplate>
+		<PagerContent>
+			<MudTablePager />
+		</PagerContent>
+	</MudTable>
+}
+
+@code {
+	private List<Review> reviews = [];
+	private List<string> errorMessages = [];
+
+	protected override void OnInitialized()
+	{
+		string fileName = @"wwwroot/data/TestData.csv";
+		int lineCounter = 0;
+		string[] reviewData = { };
+		try
+		{
+			reviewData = File.ReadAllLines(fileName);
+			foreach (string line in reviewData)
+			{
+				lineCounter++;
+				try
+				{
+					reviews.Add(Review.Parse(line));
+				}
+				catch (FormatException ex)
+				{
+					errorMessages.Add($"Format Error: {lineCounter}: {GetInnerException(ex).Message}");
+				}
+				catch (ArgumentNullException ex)
+				{
+					errorMessages.Add($"Null Error: {lineCounter}: {GetInnerException(ex).Message}");
+				}
+				catch (ArgumentException ex)
+				{
+					errorMessages.Add($"Argument Error: {lineCounter}: {GetInnerException(ex).Message}");
+				}
+				catch (Exception ex)
+				{
+					errorMessages.Add($"Record Error: {lineCounter}: {GetInnerException(ex).Message}");
+				}
+			}
+		}
+		catch (Exception ex)
+		{
+			errorMessages.Add($"File Read Error: {GetInnerException(ex).Message}");
+		}
+		base.OnInitialized();
+	}
+
+
+	private Exception GetInnerException(Exception ex)
+	{
+		while (ex.InnerException != null)
+			ex = ex.InnerException;
+		return ex;
+	}
+}
